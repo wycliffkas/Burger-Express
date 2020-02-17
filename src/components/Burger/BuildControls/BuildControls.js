@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './BuildControls.module.css';
 import BuildControl from '../BuildControl/BuildControl'
+import classes from './BuildControls.module.css';
 
 const controls = [ 
     {label: 'Salad', type: 'salad'},
@@ -20,7 +21,11 @@ const BuildControls = (props) => (
             disabled={props.disabled[ctrl.type]}
             />
     ))};
-    </div>
+    <button 
+        className={classes.OrderButton}
+        disabled={!props.purchase} >ORDER NOW</button>
+        {console.log("props.purchase", props.purchase)}
+    </div>    
 );
 
 export default BuildControls;
