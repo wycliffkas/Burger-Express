@@ -26,13 +26,16 @@ class BurgerBuilder extends Component {
   };
 
   componentDidMount() {
-    axios.get('https://burgerexpress-4e7e1.firebaseio.com/ingredients.json')
-    .then(response => {
-      this.setState({
-        ingredients: response.data
+    axios
+      .get("https://burgerexpress-4e7e1.firebaseio.com/ingredients.json")
+      .then(response => {
+        this.setState({
+          ingredients: response.data
+        });
+      })
+      .catch(error => {
+        this.setState({ error: false });
       });
-    })
-    .catch(error => {this.setState({error: false})});
   }
 
   updatePurchasableState = ingredients => {
@@ -86,28 +89,21 @@ class BurgerBuilder extends Component {
   };
 
   purchaseContinueHandler = () => {
-    this.setState({ loading: true });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      customer: {
-        name: "Wycliff Kasirye",
-        address: {
-          street: "Kampala",
-          zipCode: "256",
-          country: "Uganda"
-        },
-        email: "w4wycliff@gmail.com"
-      }
-    };
-    axios
-      .post("/orders.json", order)
-      .then(response => {
-        this.setState({ loading: false, purchasing: false });
-      })
-      .catch(error => {
-        this.setState({ loading: false, purchasing: false });
-      });
+    const queryParams = [];
+
+    for (let i in this.state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(i) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[i])
+      );
+    }
+    queryParams.push("price=" + this.state.totalPrice);
+    const queryString = queryParams.join("&");
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryString
+    });
   };
 
   render() {
@@ -115,7 +111,11 @@ class BurgerBuilder extends Component {
 
     let orderSummary = null;
 
-    let burger = this.state.error ? <p>Ingredients cant be loaded</p> :<Spinner />;
+    let burger = this.state.error ? (
+      <p>Ingredients cant be loaded</p>
+    ) : (
+      <Spinner />
+    );
     if (this.state.ingredients) {
       burger = (
         <Aux>
@@ -142,7 +142,7 @@ class BurgerBuilder extends Component {
     }
 
     if (this.state.loading) {
-        orderSummary = <Spinner />;
+      orderSummary = <Spinner />;
     }
 
     for (let key in disabledInfo) {
